@@ -1,7 +1,3 @@
-# FAILS if model_name does not exist
-# FAILS if query not given
-# FAILS if any other args given (https://webargs.readthedocs.io/en/latest/api.html#webargs.core.Parser.use_args)
-
 from flask import Flask
 from flask import jsonify
 from webargs import fields
@@ -12,7 +8,7 @@ import botocore
 import io
 
 # Module scope resources
-app = Flask(__name__)
+application = Flask(__name__)
 s3 = boto3.resource('s3')
 
 
@@ -37,14 +33,14 @@ class InvalidUsage(Exception):
         return rv
 
 
-@app.errorhandler(InvalidUsage)
+@application.errorhandler(InvalidUsage)
 def handle_invalid_usage(error):
     response = jsonify(error.to_dict())
     response.status_code = error.status_code
     return response
 
 
-@app.route('/<string:model_name>', methods=['GET'])
+@application.route('/<string:model_name>', methods=['GET'])
 @use_args(argmap={'q': fields.Str(required=True)}, as_kwargs=True)
 def process_query(q, model_name):
     # Check whether the model exists
@@ -69,4 +65,4 @@ def process_query(q, model_name):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    application.run()

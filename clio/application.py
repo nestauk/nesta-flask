@@ -6,15 +6,12 @@ import pickle
 import boto3
 import botocore
 import io
+from dummy_module import dummy_model
+
 
 # Module scope resources
 application = Flask(__name__)
 s3 = boto3.resource('s3')
-
-
-class dummy_model:
-    def query(self, q):
-        return "Query had length {}".format(len(q))
 
 
 class InvalidUsage(Exception):
@@ -48,8 +45,8 @@ def process_query(q, model_name):
     try:
         s3.Object('clio-models', file_name).load()
     except botocore.exceptions.ClientError as e:
-        raise InvalidUsage('No model named "{}"'.format(model_name),
-                           status_code=400)
+        err_msg = 'No model named "{}"'.format(model_name)
+        raise InvalidUsage(err_msg, status_code=400)
 
     # Retrieve the model
     with io.BytesIO() as data:
